@@ -1,20 +1,71 @@
 # VCF Filter – Comprehensive Somatic Variant Filtering & Splitter
 
-A robust, production‑ready Python command‑line tool for filtering and splitting VCF (Variant Call Format) files from somatic variant callers (such as Mutect2, Strelka2, or VarScan2). It supports fine‑grained quality control, variant‑type classification, and multiple output modes—all with no external dependencies.
+A robust, production‑ready Python command‑line tool for filtering and splitting VCF (Variant Call Format) files from somatic variant callers (such as Mutect2, Strelka2, or VarScan2). It supports fine‑grained quality control, variant‑type classification, and multiple output modes—all with **no external dependencies**.
+
+> **Repository:** [https://github.com/ahmadsam66/VCF_filter](https://github.com/ahmadsam66/VCF_filter)
 
 ---
 
 ## Table of Contents
 
+- [Installation](#installation)
 - [Domain Background](#domain-background)
 - [Tool Functionality](#tool-functionality)
-- [Prerequisites & Installation](#prerequisites--installation)
 - [Command‑Line Options](#commandline-options)
-- [How to Run](#how-to-run)
+- [Usage](#usage)
   - [Command‑Line Interface (CLI)](#commandline-interface-cli)
   - [Interactive Terminal Mode](#interactive-terminal-mode)
 - [Example Workflows](#example-workflows)
 - [License](#license)
+
+---
+
+## Installation
+
+### Clone the repository (recommended)
+
+```bash
+git clone https://github.com/ahmadsam66/VCF_filter.git
+cd VCF_filter
+```
+
+### Make the script executable
+
+```bash
+chmod +x vcf_filter.py
+```
+
+### Verify Python version
+
+The script requires **Python 3.6+**. Check your version:
+
+```bash
+python3 --version
+```
+
+If you have an older version, install Python 3 from your system’s package manager (e.g., `apt install python3` on Ubuntu, `brew install python` on macOS).
+
+### Optional: Add to PATH
+
+To run the script from anywhere, you can add it to your `PATH` or create a symbolic link:
+
+```bash
+# Example: link to ~/bin (create if it doesn't exist)
+mkdir -p ~/bin
+ln -s $(pwd)/vcf_filter.py ~/bin/vcf_filter
+export PATH="$HOME/bin:$PATH"   # add this to your .bashrc/.zshrc
+```
+
+Now you can simply run `vcf_filter` from any directory.
+
+### Direct download (alternative)
+
+If you prefer not to clone the entire repository:
+
+```bash
+curl -O https://raw.githubusercontent.com/ahmadsam66/VCF_filter/main/vcf_filter.py
+chmod +x vcf_filter.py
+```
 
 ---
 
@@ -74,132 +125,155 @@ The **INFO** and **FORMAT** fields contain many quality metrics used by somatic 
 
 ---
 
-## Prerequisites & Installation
-
-- **Python 3.6** or higher (standard library only – no external packages required).
-- The script is self‑contained; download `vcf_filter.py` and make it executable:
-
-```bash
-curl -O https://example.com/path/to/vcf_filter.py   # or copy the file
-chmod +x vcf_filter.py
-
-
-    Ensure your input VCF is uncompressed (or use gzip -cd to pipe). The tool reads plain VCF files; for gzipped input, decompress first or pipe via zcat (see examples).
-
-Command‑Line Options
+## Command‑Line Options
 
 All options are available both as command‑line arguments and (in a subset) via the interactive mode.
-Option	Type	Default	Description
--i, --input	path	required	Input VCF file path.
--o, --output	path	auto‑generated	Exact output VCF filename (only when not splitting).
--t, --tag	string	filtered	Suffix tag for auto‑generated output filename (e.g., my_vcf_filtered.vcf).
---var-type	{all, snv, indel, mnv}	all	Keep only the specified variant type.
---split-types	flag	False	Split output into separate files: _snvs.vcf, _indels.vcf, _mnvs.vcf.
---chrom	string	None	Keep variants only on this chromosome (e.g., chr1).
---pass-only	flag	False	Keep only records with FILTER == PASS.
---min-qual	float	None	Minimum QUAL score (column 6).
---min-mq	float	None	Minimum mapping quality (INFO/MQ).
---min-mmq	float	None	Minimum median mapping quality (INFO/MMQ).
---min-mbq	float	None	Minimum median base quality (INFO/MBQ).
---min-info-dp	float	None	Minimum total depth from INFO/DP.
---min-sample-dp	int	None	Minimum tumor sample depth (FORMAT/DP).
---min-tlod	float	None	Minimum tumor log‑odds (INFO/TLOD, Mutect2).
---min-nlod	float	None	Minimum normal log‑odds (INFO/NLOD, Mutect2).
---min-nalod	float	None	Minimum normal allele log‑odds (INFO/NALOD, Mutect2).
---max-ecnt	int	None	Maximum event count (INFO/ECNT, Mutect2).
---min-mfrl	float	None	Minimum median fragment length (INFO/MFRL).
---min-mpos	float	None	Minimum median distance from read end (INFO/MPOS).
---exclude-str	flag	False	Exclude variants flagged as STR (short tandem repeats).
---min-af	float	None	Minimum tumor allele frequency (FORMAT/AF).
---min-alt-ad	int	None	Minimum alternate allele read count (FORMAT/AD).
---min-f1r2	int	None	Minimum F1R2 read count (FORMAT/F1R2).
---min-f2r1	int	None	Minimum F2R1 read count (FORMAT/F2R1).
---require-phased	flag	False	Keep only variants that are phased (PGT present or | in GT).
-How to Run
-Command‑Line Interface (CLI)
 
-Use the script with the -i/--input argument and any combination of filters.
-bash
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `-i`, `--input` | path | **required** | Input VCF file path. |
+| `-o`, `--output` | path | auto‑generated | Exact output VCF filename (only when not splitting). |
+| `-t`, `--tag` | string | `filtered` | Suffix tag for auto‑generated output filename (e.g., `my_vcf_filtered.vcf`). |
+| `--var-type` | `{all, snv, indel, mnv}` | `all` | Keep only the specified variant type. |
+| `--split-types` | flag | `False` | Split output into separate files: `_snvs.vcf`, `_indels.vcf`, `_mnvs.vcf`. |
+| `--chrom` | string | `None` | Keep variants only on this chromosome (e.g., `chr1`). |
+| `--pass-only` | flag | `False` | Keep only records with `FILTER == PASS`. |
+| `--min-qual` | float | `None` | Minimum QUAL score (column 6). |
+| `--min-mq` | float | `None` | Minimum mapping quality (INFO/MQ). |
+| `--min-mmq` | float | `None` | Minimum median mapping quality (INFO/MMQ). |
+| `--min-mbq` | float | `None` | Minimum median base quality (INFO/MBQ). |
+| `--min-info-dp` | float | `None` | Minimum total depth from INFO/DP. |
+| `--min-sample-dp` | int | `None` | Minimum tumor sample depth (FORMAT/DP). |
+| `--min-tlod` | float | `None` | Minimum tumor log‑odds (INFO/TLOD, Mutect2). |
+| `--min-nlod` | float | `None` | Minimum normal log‑odds (INFO/NLOD, Mutect2). |
+| `--min-nalod` | float | `None` | Minimum normal allele log‑odds (INFO/NALOD, Mutect2). |
+| `--max-ecnt` | int | `None` | Maximum event count (INFO/ECNT, Mutect2). |
+| `--min-mfrl` | float | `None` | Minimum median fragment length (INFO/MFRL). |
+| `--min-mpos` | float | `None` | Minimum median distance from read end (INFO/MPOS). |
+| `--exclude-str` | flag | `False` | Exclude variants flagged as STR (short tandem repeats). |
+| `--min-af` | float | `None` | Minimum tumor allele frequency (FORMAT/AF). |
+| `--min-alt-ad` | int | `None` | Minimum alternate allele read count (FORMAT/AD). |
+| `--min-f1r2` | int | `None` | Minimum F1R2 read count (FORMAT/F1R2). |
+| `--min-f2r1` | int | `None` | Minimum F2R1 read count (FORMAT/F2R1). |
+| `--require-phased` | flag | `False` | Keep only variants that are phased (PGT present or `|` in GT). |
 
-./vcf_filter.py -i somatic.vcf [options]
+---
 
-If you have a gzipped input, you can decompress on the fly and pipe:
-bash
+## Usage
 
-zcat somatic.vcf.gz | ./vcf_filter.py -i /dev/stdin [options]
+### Command‑Line Interface (CLI)
 
-Interactive Terminal Mode
+Run the script from the terminal with the input file and any desired filters.
 
-Run the script without any arguments to launch an interactive prompt that walks you through the most common settings.
-bash
+**Basic syntax:**
 
+```bash
+./vcf_filter.py -i <input.vcf> [options]
+```
+
+**Example:** filter by quality and PASS flag:
+
+```bash
+./vcf_filter.py -i somatic.vcf --pass-only --min-qual 30
+```
+
+If you have a **gzipped** VCF, you can decompress on‑the‑fly and pipe it:
+
+```bash
+zcat somatic.vcf.gz | ./vcf_filter.py -i /dev/stdin --pass-only
+```
+
+### Interactive Terminal Mode
+
+Run the script **without any arguments** to start an interactive session. It will guide you through the most common filtering parameters step by step.
+
+```bash
 ./vcf_filter.py
+```
 
-The interactive mode will ask for the input file path, variant type selection, output naming, and then prompt for each filter value. Press ENTER to skip any filter.
-Example Workflows
+You will be prompted for:
+- Input VCF path
+- Variant type selection (all, SNV only, Indel only, or split into separate files)
+- Output filename or tag
+- Each individual filter (press ENTER to skip any)
+
+This mode is ideal for beginners or one‑off analyses.
+
+---
+
+## Example Workflows
 
 Below are 10 practical examples, ranging from simple to complex.
-1. Basic PASS filter
+
+### 1. Basic PASS filter
 
 Keep only variants that passed all filters and are of high quality (QUAL >= 30).
-bash
 
+```bash
 ./vcf_filter.py -i raw_somatic.vcf --pass-only --min-qual 30
+```
 
-2. Filter by chromosome
+### 2. Filter by chromosome
 
 Extract all PASS variants on chromosome 2.
-bash
 
+```bash
 ./vcf_filter.py -i raw_somatic.vcf --chrom chr2 --pass-only
+```
 
-3. Depth filters only
+### 3. Depth filters only
 
 Require total INFO depth >= 20 and tumor sample depth >= 10.
-bash
 
+```bash
 ./vcf_filter.py -i raw_somatic.vcf --min-info-dp 20 --min-sample-dp 10
+```
 
-4. Mutect2‑specific LOD filters
+### 4. Mutect2‑specific LOD filters
 
 Apply recommended Mutect2 thresholds: TLOD >= 6, NLOD >= 3, NALOD >= 2, and ECNT <= 3.
-bash
 
+```bash
 ./vcf_filter.py -i mutect2.vcf --min-tlod 6.0 --min-nlod 3.0 --min-nalod 2.0 --max-ecnt 3
+```
 
-5. Strand bias and read position filters
+### 5. Strand bias and read position filters
 
 Use high‑stringency filters to reduce strand bias artifacts.
-bash
 
+```bash
 ./vcf_filter.py -i somatic.vcf --min-mbq 30 --min-mfrl 50 --min-mpos 10
+```
 
-6. Allele frequency and alternate read count
+### 6. Allele frequency and alternate read count
 
 Keep only variants with tumor AF >= 5% and at least 5 alternate reads.
-bash
 
+```bash
 ./vcf_filter.py -i somatic.vcf --min-af 0.05 --min-alt-ad 5
+```
 
-7. Only SNVs
+### 7. Only SNVs
 
 Extract only single‑nucleotide variants (ignore indels and MNVs).
-bash
 
+```bash
 ./vcf_filter.py -i somatic.vcf --var-type snv
+```
 
-8. Split into separate SNV, Indel, and MNV files
+### 8. Split into separate SNV, Indel, and MNV files
 
-This creates three output files: somatic_snvs.vcf, somatic_indels.vcf, and somatic_mnvs.vcf.
-bash
+This creates three output files: `somatic_snvs.vcf`, `somatic_indels.vcf`, and `somatic_mnvs.vcf`.
 
+```bash
 ./vcf_filter.py -i somatic.vcf --split-types
+```
 
-9. Full production filter (combined)
+### 9. Full production filter (combined)
 
 Apply a comprehensive set of filters often used in somatic variant calling pipelines.
-bash
 
+```bash
 ./vcf_filter.py -i tumor_normal.vcf \
   --pass-only \
   --min-qual 30 \
@@ -216,18 +290,23 @@ bash
   --min-alt-ad 5 \
   --exclude-str \
   --var-type all
+```
 
-10. Interactive mode
+### 10. Interactive mode
 
 Launch the interactive terminal and follow the prompts to set up a custom filtering session.
-bash
 
+```bash
 ./vcf_filter.py
+```
 
-License
+---
 
-This project is distributed under the MIT License. See below for the full license text:
+## License
 
+This project is distributed under the **MIT License**. See below for the full license text:
+
+```
 MIT License
 
 Copyright (c) 2025 [Your Name or Organization]
@@ -249,3 +328,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
